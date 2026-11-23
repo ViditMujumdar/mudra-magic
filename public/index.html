@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Mudra Magic: cast classical Indian spells with your hands</title>
+  <meta name="description" content="Show your hand to the camera and form Bharatanatyam mudras. A lotus of light blooms, fire rises, a peacock fan opens. Live in your browser, nothing uploaded." />
+  <meta name="theme-color" content="#05030c" />
+  <meta property="og:title" content="Mudra Magic: your hands cast spells" />
+  <meta property="og:description" content="Form classical Indian mudras in front of your camera and watch them turn into spells of light. Live in your browser." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2305030c'/%3E%3Cg fill='none' stroke='%23ffc861' stroke-width='3'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Cpath d='M32 12c6 8 6 16 0 22-6-6-6-14 0-22zM12 32c8-6 16-6 22 0-6 6-14 6-22 0zM52 32c-8 6-16 6-22 0 6-6 14-6 22 0z'/%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="stage" class="stage"></div>
+  <video id="cam" playsinline muted autoplay></video>
+
+  <!-- ================= INTRO ================= -->
+  <section id="intro" class="intro is-on">
+    <div class="intro-top">
+      <span class="live"><i></i><b id="i-casts">0</b> spells cast · <b id="i-sorc">0</b> sorcerers</span>
+    </div>
+    <div class="intro-title">
+      <div class="deva-bg" aria-hidden="true">मुद्रा</div>
+      <p class="kicker">Bharatanatyam × computer vision</p>
+      <h1><span class="t1">MUDRA</span><span class="t2">MAGIC</span></h1>
+      <p class="tag">Your hands cast classical Indian spells. <b>Live, in your browser.</b></p>
+    </div>
+    <div class="spell-strip" id="spell-strip" aria-label="The five mudras"></div>
+    <div class="intro-cta">
+      <label class="college">
+        <span>Cast for your college <i>(optional, for the live wall)</i></span>
+        <input id="college" list="college-list" maxlength="64" placeholder="e.g. NIT Trichy, VIT, DU…" autocomplete="off" />
+        <datalist id="college-list"></datalist>
+      </label>
+      <button class="btn btn-gold" id="go-cam" type="button"><span>✋</span> Begin with camera</button>
+      <button class="btn btn-ghost" id="go-touch" type="button">👆 No camera? Play with touch</button>
+      <p class="fine">🔒 Your camera never leaves your phone. Nothing is recorded or uploaded.</p>
+    </div>
+  </section>
+
+  <!-- ================= HUD ================= -->
+  <section id="hud" class="hud">
+    <header class="hud-top">
+      <button class="ibtn" id="back" type="button" aria-label="Back">←</button>
+      <div class="book" id="book" aria-label="Your mudra book"></div>
+      <button class="ibtn" id="mute" type="button" aria-label="Sound on/off">🔊</button>
+    </header>
+
+    <div class="status" id="status" hidden><span class="spin"></span><span id="status-t">Waking up the magic…</span></div>
+
+    <div class="cast-name" id="cast-name" aria-live="polite">
+      <div class="cn-deva" id="cn-deva"></div>
+      <div class="cn-en" id="cn-en"></div>
+      <div class="cn-spell" id="cn-spell"></div>
+      <div class="cn-charge"><span id="cn-bar"></span></div>
+    </div>
+
+    <div class="coach" id="coach">
+      <canvas id="coach-icon" width="120" height="120"></canvas>
+      <div><b id="coach-t"></b><span id="coach-d"></span></div>
+    </div>
+
+    <div class="dock" id="dock" hidden></div>
+
+    <footer class="hud-bot">
+      <button class="pill" id="guide-btn" type="button">📖 Mudras</button>
+      <button class="pill pill-gold" id="card-btn" type="button" disabled>✨ My spell card</button>
+      <button class="pill" id="wall-btn" type="button">🏆 Wall</button>
+    </footer>
+  </section>
+
+  <div class="unlock" id="unlock" hidden>
+    <div class="u-ray" aria-hidden="true"></div>
+    <p class="u-k">New mudra unlocked</p>
+    <div class="u-deva" id="u-deva"></div>
+    <div class="u-en" id="u-en"></div>
+    <p class="u-r" id="u-r"></p>
+  </div>
+
+  <!-- ================= SHEETS ================= -->
+  <div class="sheet" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="g-h">
+    <div class="sheet-bg" data-close></div>
+    <div class="sheet-card">
+      <button class="x" data-close type="button" aria-label="Close">✕</button>
+      <h2 id="g-h">The five mudras <span id="g-count"></span></h2>
+      <p class="sheet-sub">Mudras are the hand gestures of Bharatanatyam. Hold one steady for half a second to cast it.</p>
+      <div class="glist" id="glist"></div>
+    </div>
+  </div>
+
+  <div class="sheet" id="wall" hidden role="dialog" aria-modal="true" aria-labelledby="w-h">
+    <div class="sheet-bg" data-close></div>
+    <div class="sheet-card">
+      <button class="x" data-close type="button" aria-label="Close">✕</button>
+      <h2 id="w-h">The Mudra Wall <span class="live sm"><i></i>live</span></h2>
+      <div class="w-stats"><div><b id="w-casts">0</b><small>spells cast</small></div><div><b id="w-sorc">0</b><small>sorcerers</small></div></div>
+      <h3>How rare is each mudra?</h3>
+      <div class="rarity" id="rarity"></div>
+      <h3>Colleges casting the most magic</h3>
+      <ol class="cboard" id="cboard"></ol>
+      <label class="college inline"><span>Your college</span><input id="college2" list="college-list" maxlength="64" placeholder="Add your college to the wall" /></label>
+      <h3>Just unlocked</h3>
+      <ul class="feed" id="feed"></ul>
+    </div>
+  </div>
+
+  <div class="sheet" id="cardsheet" hidden role="dialog" aria-modal="true" aria-label="Your spell card">
+    <div class="sheet-bg" data-close></div>
+    <div class="sheet-card center">
+      <button class="x" data-close type="button" aria-label="Close">✕</button>
+      <h2>Your spell card ✨</h2>
+      <img id="card-img" alt="Your mudra spell card" />
+      <div class="row2">
+        <a class="btn btn-ghost" id="card-dl" download="mudra-magic.png">⬇️ Save</a>
+        <button class="btn btn-gold" id="card-share" type="button">↗️ Share</button>
+      </div>
+      <p class="fine">Post it and dare your friends: <b>can your hands do this?</b></p>
+    </div>
+  </div>
+
+  <pre class="debug" id="debug" hidden></pre>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <footer class="made" id="made">Built by a student with AI · Hosted on <a href="https://embarko.ai" target="_blank" rel="noopener">Embarko</a></footer>
+
+  <script type="importmap">{ "imports": { "three": "/vendor/three.module.min.js", "three/addons/": "/vendor/addons/" } }</script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
